@@ -422,7 +422,7 @@
                 ">
                 <h1>Yiwei (Peter) Wang</h1>
                 <p class="subtitle">Applied Math & Computer Science @ Brown University</p>
-                <p>Building projects that apply what I've learned so far!</p>
+                <p>AMONG US!!!</p>
                 <a href="#projects" class="cta-button">Explore My Work</a>
             </div>
             <div class="scroll-indicator"></div>
@@ -454,15 +454,15 @@
                 <div class="project-constellation">
                     <div class="project-node">
                         <h3>Project Alpha</h3>
-                        <p>An innovative web application with real-time 3D visualization and interactive physics simulations</p>
+                        <p>unga</p>
                     </div>
                     <div class="project-node">
                         <h3>Project Beta</h3>
-                        <p>Interactive data dashboard with stunning animations and seamless user experience</p>
+                        <p>bunga</p>
                     </div>
                     <div class="project-node">
                         <h3>Project Gamma</h3>
-                        <p>Immersive portfolio experience using WebGL and custom shader effects</p>
+                        <p>chunga</p>
                     </div>
                 </div>
             </div>
@@ -483,7 +483,6 @@
     </div>
 
     <script>
-        // Three.js Scene Setup
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -494,7 +493,6 @@
 
         camera.position.z = 5;
 
-        // Lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
         scene.add(ambientLight);
 
@@ -510,7 +508,6 @@
         pointLight3.position.set(0, 5, -5);
         scene.add(pointLight3);
 
-        // Create more varied geometric shapes
         const geometries = [
             new THREE.TorusGeometry(0.7, 0.2, 16, 100),
             new THREE.OctahedronGeometry(0.8),
@@ -548,7 +545,6 @@
             shapes.push(mesh);
         }
 
-        // Enhanced particles with color
         const particlesGeometry = new THREE.BufferGeometry();
         const particlesCount = 2000;
         const posArray = new Float32Array(particlesCount * 3);
@@ -581,7 +577,6 @@
         const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particlesMesh);
 
-        // Mouse interaction
         let mouseX = 0;
         let mouseY = 0;
         let targetX = 0;
@@ -592,25 +587,21 @@
             mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
         });
 
-        // Scroll-based effects
         let scrollY = window.scrollY;
 
         window.addEventListener('scroll', () => {
             scrollY = window.scrollY;
         });
 
-        // Animation loop
         const clock = new THREE.Clock();
 
         function animate() {
             requestAnimationFrame(animate);
             const elapsedTime = clock.getElapsedTime();
 
-            // Smooth camera movement
             targetX += (mouseX - targetX) * 0.05;
             targetY += (mouseY - targetY) * 0.05;
 
-            // Rotate and move shapes with organic motion
             shapes.forEach((shape, i) => {
                 shape.rotation.x += shape.userData.rotationSpeed;
                 shape.rotation.y += shape.userData.rotationSpeed;
@@ -618,34 +609,28 @@
                 shape.position.x += shape.userData.speedX;
                 shape.position.y += shape.userData.speedY;
                 
-                // Add wave motion
                 shape.position.y += Math.sin(elapsedTime + i) * 0.001;
                 shape.position.x += Math.cos(elapsedTime + i) * 0.001;
                 
                 if (Math.abs(shape.position.x) > 12) shape.userData.speedX *= -1;
                 if (Math.abs(shape.position.y) > 12) shape.userData.speedY *= -1;
                 
-                // Pulse opacity
                 shape.material.opacity = 0.3 + Math.sin(elapsedTime + i) * 0.2;
             });
 
-            // Rotate and pulse particles
             particlesMesh.rotation.y = elapsedTime * 0.05;
             particlesMesh.rotation.x = Math.sin(elapsedTime * 0.3) * 0.1;
 
-            // Animate lights
             pointLight1.position.x = Math.sin(elapsedTime * 0.5) * 7;
             pointLight1.position.y = Math.cos(elapsedTime * 0.3) * 7;
             
             pointLight2.position.x = Math.cos(elapsedTime * 0.4) * 7;
             pointLight2.position.y = Math.sin(elapsedTime * 0.5) * 7;
 
-            // Camera follows mouse smoothly
             camera.position.x += (targetX * 1 - camera.position.x) * 0.05;
             camera.position.y += (targetY * 1 - camera.position.y) * 0.05;
             camera.lookAt(scene.position);
 
-            // Scroll effect on camera with smooth interpolation
             const targetZ = 5 + scrollY * 0.002;
             camera.position.z += (targetZ - camera.position.z) * 0.05;
 
@@ -654,14 +639,12 @@
 
         animate();
 
-        // Handle window resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
