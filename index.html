@@ -10,8 +10,24 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            cursor: none;
         }
-
+        .custom-cursor {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            transition: transform 0.2s ease;
+        }
+        
+        .custom-cursor.clicking {
+            transform: scale(0.8);
+        }
+        
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #000000;
@@ -652,6 +668,38 @@
                 if (target) {
                     target.scrollIntoView({ behavior: 'smooth' });
                 }
+            });
+        });
+        const cursor = document.createElement('div');
+        cursor.style.cssText = `
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.8), transparent);
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease;
+        `;
+        document.body.appendChild(cursor);
+        
+        const trails = [];
+        for (let i = 0; i < 10; i++) {
+            const trail = cursor.cloneNode();
+            trail.style.opacity = (10 - i) / 20;
+            document.body.appendChild(trail);
+            trails.push(trail);
+        }
+        
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX - 10 + 'px';
+            cursor.style.top = e.clientY - 10 + 'px';
+            
+            trails.forEach((trail, index) => {
+                setTimeout(() => {
+                    trail.style.left = e.clientX - 10 + 'px';
+                    trail.style.top = e.clientY - 10 + 'px';
+                }, index * 20);
             });
         });
     </script>
