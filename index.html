@@ -7,887 +7,264 @@
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Unbounded:wght@800;900&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --p-red:#d32f2f;
-      --p-black:#050505;
-      --p-white:#f0f0f0;
-      --p-teal:#00ffd4;
-
+    :root {
+      --p-red: #d32f2f;
+      --p-black: #050505;
+      --p-white: #f5f5f5;
+      --p-teal: #00ffd4;
       --stroke: 3px;
-      --shadow: 8px;
       --ease: cubic-bezier(.19,1,.22,1);
       --ease2: cubic-bezier(.2,.9,.2,1);
     }
 
-    *{ margin:0; padding:0; box-sizing:border-box; cursor: crosshair; }
-    html, body { height: 100%; }
-    body{
+    /* Prevent accidental horizontal scroll */
+    * { margin:0; padding:0; box-sizing:border-box; cursor: crosshair; }
+    html, body { height: 100%; width: 100%; overflow: hidden; }
+
+    body {
       background: var(--p-black);
       color: var(--p-white);
-      font-family: 'Oswald', system-ui, sans-serif;
-      overflow: hidden; /* enable after intro */
+      font-family: 'Oswald', sans-serif;
       background-image: url('https://www.transparenttextures.com/patterns/asfalt-dark.png');
     }
 
-    /* ---------------------------
-       BACKGROUND CANVAS (THREE)
-    ---------------------------- */
-    #bg-canvas{
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      pointer-events: none;
-    }
+    #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
 
-    /* ---------------------------
-       INTRO TRANSITION (SPLIT)
-    ---------------------------- */
-    #intro{
-      position: fixed;
-      inset: 0;
-      z-index: 999;
-      display: grid;
-      place-items: center;
-      pointer-events: auto;
-      overflow: hidden;
-    }
-
-    .intro-panels{
-      position:absolute;
-      inset:0;
-      display:flex;
-    }
-
-    .panel{
-      flex: 1;
-      height: 100%;
-      position: relative;
-      transform: translateX(0);
-    }
-
-    /* Left = red + rough edge */
-    .panel.left{
-      background: var(--p-red);
-      clip-path: polygon(0 0, 100% 0, 92% 100%, 0% 100%);
-      box-shadow: inset -20px 0 0 rgba(0,0,0,.15);
-    }
-    /* Right = off-white + rough edge */
-    .panel.right{
-      background: var(--p-white);
-      clip-path: polygon(8% 0, 100% 0, 100% 100%, 0 100%);
-      box-shadow: inset 20px 0 0 rgba(0,0,0,.10);
-    }
-
-    /* Ink splatter-ish overlay */
-    .intro-grit{
-      position:absolute;
-      inset:-40px;
-      background:
-        radial-gradient(circle at 20% 30%, rgba(0,0,0,.35), transparent 45%),
-        radial-gradient(circle at 70% 60%, rgba(0,0,0,.25), transparent 50%),
-        radial-gradient(circle at 50% 10%, rgba(0,0,0,.18), transparent 50%);
-      mix-blend-mode: multiply;
-      opacity: .5;
-      pointer-events:none;
-    }
-
-    .intro-center{
-      position: relative;
-      z-index: 2;
-      text-align: center;
-      user-select: none;
-      padding: 24px 28px;
-      transform: rotate(-4deg);
-      border: var(--stroke) solid rgba(0,0,0,.85);
-      box-shadow: 10px 10px 0 rgba(0,0,0,.35);
-      background: rgba(0,0,0,.15);
-      backdrop-filter: blur(6px);
-    }
-
-    .intro-title{
-      font-family: 'Unbounded', sans-serif;
-      letter-spacing: -0.02em;
-      font-size: clamp(2.2rem, 5vw, 4.2rem);
-      line-height: .9;
-      text-transform: uppercase;
-      color: rgba(0,0,0,.95);
-      -webkit-text-stroke: 2px rgba(255,255,255,.65);
-      text-shadow: 0 0 0 transparent;
-    }
-
-    .intro-sub{
-      margin-top: 10px;
-      font-size: 1.1rem;
-      color: rgba(0,0,0,.85);
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      font-weight: 700;
-    }
-
-    .intro-hint{
-      margin-top: 16px;
-      display:inline-block;
-      padding: 10px 16px;
-      background: rgba(0,0,0,.85);
-      color: var(--p-white);
-      border: 2px solid rgba(255,255,255,.35);
-      transform: skewX(-18deg);
-      font-weight: 700;
-      letter-spacing: .08em;
-    }
-    .intro-hint span{ display:inline-block; transform: skewX(18deg); }
-
-    /* Intro out animation triggers */
-    body.intro-out #intro{ pointer-events:none; }
-    body.intro-out .panel.left{
-      animation: panelLeftOut 900ms var(--ease2) forwards;
-    }
-    body.intro-out .panel.right{
-      animation: panelRightOut 900ms var(--ease2) forwards;
-    }
-    body.intro-out .intro-center{
-      animation: centerPopOut 550ms var(--ease2) forwards;
-    }
-
-    @keyframes panelLeftOut{
-      0%{ transform: translateX(0); }
-      65%{ transform: translateX(-105%); }
-      100%{ transform: translateX(-130%); }
-    }
-    @keyframes panelRightOut{
-      0%{ transform: translateX(0); }
-      65%{ transform: translateX(105%); }
-      100%{ transform: translateX(130%); }
-    }
-    @keyframes centerPopOut{
-      0%{ transform: rotate(-4deg) scale(1); opacity: 1; }
-      100%{ transform: rotate(-4deg) scale(.85) translateY(10px); opacity: 0; }
-    }
-
-    /* ---------------------------
-       UI LAYER
-    ---------------------------- */
-    #ui-layer{
+    /* --- UI CONTAINER --- */
+    #ui-layer {
       position: relative;
       z-index: 10;
       height: 100vh;
       width: 100vw;
-      display:flex;
+      display: flex;
+      flex-direction: row;
       justify-content: space-between;
       align-items: center;
       padding: 0 5%;
       opacity: 0;
-      transform: translateY(10px);
-      pointer-events: none; /* will enable after intro */
+      pointer-events: none;
     }
 
-    body.ready #ui-layer{
-      opacity: 1;
-      transform: translateY(0);
-      transition: opacity 650ms var(--ease2), transform 650ms var(--ease2);
-      pointer-events: auto;
+    body.ready #ui-layer { opacity: 1; pointer-events: auto; transition: opacity 0.5s ease; }
+
+    /* --- HERO NAME REFINEMENT --- */
+    #hero {
+      width: 40%;
+      z-index: 15; /* Keep name above project nodes slightly */
     }
 
-    /* Left hero */
-    #hero{
-      width: 45%;
-      min-width: 320px;
-      user-select:none;
-    }
-
-    h1#hero-name{
+    h1#hero-name {
       font-family: 'Unbounded', sans-serif;
-      font-size: clamp(3.6rem, 7vw, 8rem);
+      font-size: clamp(3rem, 6vw, 7rem);
       text-transform: uppercase;
-      line-height: 0.84;
+      line-height: 0.85;
       transform: skewY(-5deg) rotate(-5deg);
       color: var(--p-white);
-      -webkit-text-stroke: 2px var(--p-red);
-      filter: drop-shadow(10px 10px 0 rgba(211,47,47,.25));
-      transition: transform 120ms ease-out;
-      position: relative;
+      /* Stronger outline for contrast */
+      -webkit-text-stroke: 1.5px var(--p-red);
+      paint-order: stroke fill;
+      filter: drop-shadow(8px 8px 0 rgba(0,0,0,0.8));
     }
 
-    /* Big slash accent behind name */
-    h1#hero-name::after{
-      content:"";
-      position:absolute;
-      left:-8%;
-      top:55%;
-      width: 72%;
-      height: 18px;
-      background: var(--p-teal);
-      transform: skewX(-35deg) rotate(-6deg);
-      opacity:.8;
-      z-index:-1;
-      box-shadow: 10px 10px 0 rgba(0,0,0,.35);
-    }
-
-    .hero-sub{
-      margin-top: 20px;
-      font-size: 1.25rem;
-      letter-spacing: .08em;
+    .hero-sub {
+      margin-top: 30px;
+      font-size: 1.2rem;
       text-transform: uppercase;
-      color: rgba(255,255,255,.85);
+      background: var(--p-black);
+      display: inline-block;
+      padding: 5px 10px;
+      transform: skewX(-10deg);
     }
 
-    .hero-sub b{
-      color: var(--p-teal);
-      text-decoration: line-through;
-      text-decoration-thickness: 4px;
-      text-underline-offset: 6px;
-    }
-
-    /* Right menu container */
-    #project-container{
-      width: 48%;
-      height: 82vh;
+    /* --- PROJECT LIST REFINEMENT --- */
+    #project-container {
+      width: 50%;
+      height: 75vh;
       overflow-y: auto;
-      padding-right: 18px;
-      padding-top: 36px;
-      mask-image: linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
-      -webkit-mask-image: linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
+      overflow-x: hidden; /* Fixes side-to-side bug */
+      padding: 60px 20px 150px 20px; /* Extra bottom padding for scroll space */
+      mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+      -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
     }
 
-    #project-container::-webkit-scrollbar{ width: 8px; }
-    #project-container::-webkit-scrollbar-track{ background: transparent; }
-    #project-container::-webkit-scrollbar-thumb{ background: var(--p-red); }
+    /* Custom Scrollbar */
+    #project-container::-webkit-scrollbar { width: 6px; }
+    #project-container::-webkit-scrollbar-thumb { background: var(--p-teal); }
 
-    /* Menu nodes */
-    .node{
+    .node {
       background: var(--p-white);
       color: var(--p-black);
-      margin: 22px 0;
-      padding: 18px 36px;
+      margin-bottom: 35px;
+      padding: 20px 30px;
       transform: skewX(-25deg);
-      transition: transform 260ms var(--ease), left 260ms var(--ease), background 260ms var(--ease), box-shadow 260ms var(--ease), border-color 260ms var(--ease), color 260ms var(--ease);
+      transition: all 0.3s var(--ease);
       position: relative;
-      left: 26px;
-      display:block;
-      text-decoration:none;
-      border-right: 10px solid var(--p-red);
-      box-shadow: 6px 6px 0 rgba(0,0,0,.7);
-      outline: none;
-
-      /* intro stagger */
-      opacity: 0;
-      filter: blur(1px);
-      animation: nodeIn 520ms var(--ease2) forwards;
-      animation-delay: var(--d, 0ms);
+      left: 40px;
+      display: block;
+      text-decoration: none;
+      border-right: 12px solid var(--p-red);
+      box-shadow: 8px 8px 0 rgba(0,0,0,0.5);
     }
 
-    body:not(.ready) .node{ animation: none; }
-
-    @keyframes nodeIn{
-      from { opacity:0; transform: skewX(-25deg) translateX(30px); }
-      to   { opacity:1; transform: skewX(-25deg) translateX(0); filter: blur(0); }
-    }
-
-    .node:hover{
+    .node:hover, .node.selected {
       background: var(--p-red);
       color: var(--p-white);
-      left: 0px;
-      box-shadow: -18px 0 0 var(--p-teal);
-      border-right: 10px solid var(--p-white);
+      left: 10px;
+      box-shadow: -15px 0 0 var(--p-teal), 10px 10px 0 rgba(0,0,0,0.3);
+      border-right: 12px solid var(--p-white);
     }
 
-    /* Selected (keyboard focus) */
-    .node.selected{
-      background: var(--p-red);
-      color: var(--p-white);
-      left: 0px;
-      box-shadow: -18px 0 0 var(--p-teal), 0 18px 0 rgba(0,0,0,.35);
-      border-right: 10px solid var(--p-white);
-    }
-
-    .node h3{
+    .node h3 {
       transform: skewX(25deg);
-      font-size: 2.05rem;
+      font-size: 1.8rem;
       text-transform: uppercase;
       line-height: 1;
-      letter-spacing: .02em;
     }
 
-    .node p{
+    .node p {
       transform: skewX(25deg);
-      font-size: 1rem;
-      margin-top: 6px;
-      opacity: .85;
+      font-size: 0.95rem;
+      margin-top: 8px;
       font-weight: 500;
     }
 
-    .category-tag{
+    .category-tag {
       background: var(--p-teal);
       color: #000;
-      padding: 4px 12px;
-      font-size: .9rem;
+      padding: 2px 10px;
+      font-size: 0.8rem;
       font-weight: 900;
-      position:absolute;
-      top:-14px;
-      left: 18px;
+      position: absolute;
+      top: -12px;
+      left: 15px;
       transform: skewX(25deg);
-      box-shadow: 3px 3px 0 rgba(0,0,0,.85);
-      text-transform: uppercase;
-      letter-spacing: .06em;
+      box-shadow: 2px 2px 0 #000;
     }
 
-    /* Bottom contact bar */
-    #contact-bar{
+    /* --- CONTACT BAR --- */
+    #contact-bar {
       position: fixed;
       bottom: 0;
       left: 0;
       width: 100%;
       background: var(--p-red);
-      padding: 14px 5%;
-      transform: skewY(-1deg);
-      transform-origin: left;
-      z-index: 11;
-      display:flex;
-      gap: 36px;
+      padding: 15px 5%;
+      z-index: 100;
+      display: flex;
+      gap: 30px;
       border-top: 4px solid var(--p-white);
-      opacity: 0;
-      translate: 0 10px;
+      transform: skewY(-1deg);
     }
 
-    body.ready #contact-bar{
-      opacity: 1;
-      translate: 0 0;
-      transition: opacity 650ms var(--ease2) 250ms, translate 650ms var(--ease2) 250ms;
-    }
-
-    #contact-bar a{
-      color: #fff;
-      text-decoration:none;
-      font-size: 1.35rem;
+    #contact-bar a {
+      color: white;
+      text-decoration: none;
       font-weight: 900;
-      letter-spacing: .06em;
-      transition: color 180ms ease;
-    }
-    #contact-bar a:hover{
-      color: var(--p-teal);
-      text-decoration: line-through;
-      text-decoration-thickness: 4px;
-      text-underline-offset: 6px;
+      font-size: 1.2rem;
     }
 
-    /* ---------------------------
-       DETAIL MODAL (project)
-    ---------------------------- */
-    #modal{
+    /* --- INTRO OVERLAY --- */
+    #intro {
       position: fixed;
       inset: 0;
-      z-index: 200;
+      z-index: 999;
       display: grid;
       place-items: center;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 220ms ease;
-    }
-    #modal.open{
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .modal-backdrop{
-      position:absolute;
-      inset:0;
-      background: rgba(0,0,0,.68);
-      backdrop-filter: blur(4px);
-    }
-
-    .modal-card{
-      position: relative;
-      width: min(860px, 92vw);
-      background: var(--p-white);
-      color: #000;
-      border: 4px solid #000;
-      box-shadow: 14px 14px 0 rgba(0,0,0,.7);
-      transform: rotate(-2deg) translateY(10px);
-      opacity: 0;
-      transition: transform 260ms var(--ease2), opacity 260ms var(--ease2);
-      overflow: hidden;
-    }
-    #modal.open .modal-card{
-      transform: rotate(-2deg) translateY(0);
-      opacity: 1;
-    }
-
-    .modal-top{
       background: var(--p-red);
-      color: #fff;
-      padding: 16px 18px;
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      border-bottom: 4px solid #000;
+      transition: transform 0.8s var(--ease2);
     }
+    body.ready #intro { transform: translateY(-100%); }
 
-    .modal-title{
-      font-family: 'Unbounded', sans-serif;
-      text-transform: uppercase;
-      letter-spacing: .02em;
-      font-size: 1.6rem;
-    }
-
-    .modal-close{
-      font-weight: 900;
-      border: 3px solid #000;
-      background: #fff;
-      padding: 8px 12px;
-      transform: skewX(-18deg);
-      cursor: pointer;
-    }
-    .modal-close span{ display:inline-block; transform: skewX(18deg); }
-
-    .modal-body{
-      padding: 18px 18px 20px;
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 16px;
-    }
-
-    .modal-desc{
-      font-size: 1.05rem;
-      line-height: 1.55;
-      font-weight: 500;
-    }
-
-    .modal-proof{
-      margin-top: 10px;
-      padding-left: 18px;
-      font-weight: 700;
-    }
-    .modal-proof li{ margin: 6px 0; }
-
-    .modal-media{
-      border: 4px solid #000;
-      background: #000;
-      height: 220px;
-      overflow:hidden;
-      display:grid;
-      place-items:center;
-      box-shadow: 8px 8px 0 rgba(0,0,0,.35);
-    }
-    .modal-media img{
-      width:100%;
-      height:100%;
-      object-fit: cover;
-      opacity: .92;
-    }
-    .modal-media .placeholder{
-      color: rgba(255,255,255,.85);
-      font-weight: 900;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      padding: 14px;
-      text-align:center;
-    }
-
-    .modal-links{
-      margin-top: 12px;
-      display:flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .pill{
-      display:inline-block;
-      padding: 10px 14px;
-      background: #000;
-      color: #fff;
-      text-decoration:none;
-      font-weight: 900;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      transform: skewX(-18deg);
-      border: 2px solid rgba(255,255,255,.2);
-    }
-    .pill span{ display:inline-block; transform: skewX(18deg); }
-    .pill:hover{ color: var(--p-teal); text-decoration: line-through; }
-
-    /* ---------------------------
-       MOBILE
-    ---------------------------- */
-    @media (max-width: 860px){
-      #ui-layer{ flex-direction: column; justify-content: flex-start; padding-top: 24px; }
-      #hero{ width: 92%; }
-      #project-container{ width: 92%; height: 56vh; padding-top: 18px; }
-      #contact-bar{ gap: 18px; }
-      .modal-body{ grid-template-columns: 1fr; }
-    }
-
-    /* Reduced motion */
-    @media (prefers-reduced-motion: reduce){
-      *{ scroll-behavior: auto !important; animation: none !important; transition: none !important; }
-      h1#hero-name{ transform: none !important; }
-      #intro{ display:none; }
-      #ui-layer, #contact-bar{ opacity: 1 !important; transform: none !important; translate: 0 0 !important; pointer-events:auto !important; }
-      body{ overflow:auto !important; }
+    /* --- MOBILE FIXES --- */
+    @media (max-width: 860px) {
+      #ui-layer { flex-direction: column; padding-top: 50px; }
+      #hero { width: 100%; text-align: center; }
+      #project-container { width: 100%; height: 50vh; mask-image: none; }
+      .node { left: 0; margin-bottom: 25px; }
+      h1#hero-name { font-size: 3.5rem; }
     }
   </style>
 </head>
-
 <body>
+
   <canvas id="bg-canvas"></canvas>
 
-  <!-- INTRO -->
-  <div id="intro" aria-label="Intro screen">
-    <div class="intro-panels">
-      <div class="panel left"></div>
-      <div class="panel right"></div>
-    </div>
-    <div class="intro-grit"></div>
-
-    <div class="intro-center">
-      <div class="intro-title">PORTFOLIO</div>
-      <div class="intro-sub">Research • CS • Quant</div>
-      <div class="intro-hint"><span>PRESS ANY KEY / CLICK</span></div>
+  <div id="intro">
+    <div style="text-align:center; transform: rotate(-3deg);">
+      <h2 style="font-family:'Unbounded'; font-size: 3rem; -webkit-text-stroke: 1px #fff;">INITIALIZING</h2>
+      <p style="font-weight:700; letter-spacing: 5px;">CLICK TO AWAKEN</p>
     </div>
   </div>
 
-  <!-- UI -->
   <div id="ui-layer">
     <div id="hero">
       <h1 id="hero-name">YIWEI<br>WANG</h1>
-      <div class="hero-sub">Game/Software Dev + <b>Quant Finance</b></div>
+      <div class="hero-sub">Research • CS • Quant</div>
     </div>
 
-    <div id="project-container" aria-label="Project menu">
-      <div id="project-tree"></div>
+    <div id="project-container">
+      <div id="project-tree">
+        </div>
     </div>
   </div>
 
-  <!-- CONTACT -->
   <div id="contact-bar">
     <a href="mailto:yiweiwang2007@gmail.com">EMAIL</a>
-    <a href="https://github.com/yiweipwang" target="_blank" rel="noreferrer">GITHUB</a>
-    <a href="https://linkedin.com/in/yiwei-wang-12bb88285" target="_blank" rel="noreferrer">LINKEDIN</a>
-  </div>
-
-  <!-- MODAL -->
-  <div id="modal" aria-hidden="true">
-    <div class="modal-backdrop" id="modal-backdrop"></div>
-    <div class="modal-card" role="dialog" aria-modal="true" aria-label="Project details">
-      <div class="modal-top">
-        <div class="modal-title" id="modal-title">PROJECT</div>
-        <button class="modal-close" id="modal-close" type="button"><span>ESC</span></button>
-      </div>
-      <div class="modal-body">
-        <div>
-          <div class="modal-desc" id="modal-desc"></div>
-          <ul class="modal-proof" id="modal-proof"></ul>
-          <div class="modal-links" id="modal-links"></div>
-        </div>
-        <div>
-          <div class="modal-media" id="modal-media"></div>
-        </div>
-      </div>
-    </div>
+    <a href="https://github.com/yiweipwang">GITHUB</a>
+    <a href="#">LINKEDIN</a>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
-    // -----------------------------
-    // 1) MODULAR CONTENT (expandable)
-    // -----------------------------
     const PROJECTS_DATA = [
-      {
-        title: "Minesweeper",
-        cat: "CS PROJECT",
-        desc: "JavaFX Minesweeper with explainable hints + AI opponent systems.",
-        proof: ["BFS auto-reveal mechanics", "Risk model / probability hints", "Playable demo + clean UI polish"],
-        links: { code: "#", demo: "#", writeup: "#" },
-        thumb: "" // put: "assets/thumbs/minesweeper.png"
-      },
-      {
-        title: "Sound Space",
-        cat: "GAME DEV",
-        desc: "Rhythm game: beat detection → synced gameplay + timing windows.",
-        proof: ["Python-based beat timestamp extraction", "Real-time scoring + input windows", "CSS/JavaFX animations + transitions"],
-        links: { code: "#", demo: "#", writeup: "" },
-        thumb: ""
-      },
-      {
-        title: "Combinatorics Research",
-        cat: "RESEARCH",
-        desc: "Hex-board tiling patterns; generalized recurrence + OEIS entry.",
-        proof: ["Derived recursive relations", "Connected to known sequences", "Published in OEIS (A365352)"],
-        links: { code: "", demo: "", writeup: "#" },
-        thumb: ""
-      },
-      {
-        title: "Quant / Market Modeling",
-        cat: "QUANT",
-        desc: "Market microstructure / modeling projects and experiments.",
-        proof: ["Backtesting + metrics focus", "Simulation mindset", "Performance + correctness first"],
-        links: { code: "#", demo: "", writeup: "#" },
-        thumb: ""
-      }
+      { title: "Minesweeper", cat: "CS PROJECT", desc: "JavaFX Minesweeper with explainable hints + AI opponent systems." },
+      { title: "Sound Space", cat: "GAME DEV", desc: "Rhythm game: beat detection → synced gameplay + timing windows." },
+      { title: "Combinatorics", cat: "RESEARCH", desc: "Hex-board tiling patterns; generalized recurrence + OEIS entry." },
+      { title: "Quant Finance", cat: "QUANT", desc: "Market microstructure / modeling projects and experiments." },
+      { title: "Signal Analysis", cat: "RESEARCH", desc: "Fourier transforms and spectral analysis for market data." }
     ];
 
-    const treeContainer = document.getElementById("project-tree");
-
-    function buildMenu(){
-      treeContainer.innerHTML = "";
-      PROJECTS_DATA.forEach((proj, idx) => {
-        const node = document.createElement("a");
-        node.className = "node";
-        node.href = "javascript:void(0)";
-        node.dataset.index = String(idx);
-        node.style.setProperty("--d", `${180 + idx * 80}ms`);
-        node.innerHTML = `
-          <span class="category-tag">${proj.cat}</span>
-          <h3>${proj.title}</h3>
-          <p>${proj.desc}</p>
-        `;
-        node.addEventListener("mouseenter", () => setSelected(idx, {scrollIntoView:false}));
-        node.addEventListener("click", () => openModal(idx));
-        treeContainer.appendChild(node);
-      });
-    }
-
-    buildMenu();
-
-    // -----------------------------
-    // 2) INTRO SPLIT TRANSITION
-    // -----------------------------
-    const intro = document.getElementById("intro");
-    let started = false;
-
-    function startExperience(){
-      if (started) return;
-      started = true;
-
-      document.body.classList.add("intro-out");
-
-      // after panels split, enable UI
-      window.setTimeout(() => {
-        intro.remove();
-        document.body.classList.add("ready");
-        document.body.style.overflow = "hidden"; // keep page non-scrolling; menu scroll only
-        // initial selection
-        setSelected(0, {scrollIntoView:false});
-      }, 950);
-    }
-
-    window.addEventListener("keydown", (e) => {
-      if (!document.body.classList.contains("ready")){
-        startExperience();
-        return;
-      }
-    }, { once: false });
-
-    intro.addEventListener("pointerdown", startExperience);
-
-    // -----------------------------
-    // 3) Keyboard nav + selection
-    // -----------------------------
-    const projectContainer = document.getElementById("project-container");
-    let selectedIndex = 0;
-
-    function nodes(){
-      return Array.from(document.querySelectorAll(".node"));
-    }
-
-    function setSelected(idx, {scrollIntoView=true} = {}){
-      const ns = nodes();
-      if (!ns.length) return;
-
-      selectedIndex = Math.max(0, Math.min(idx, ns.length - 1));
-      ns.forEach((n, i) => n.classList.toggle("selected", i === selectedIndex));
-
-      if (scrollIntoView){
-        ns[selectedIndex].scrollIntoView({ block: "nearest", behavior: "smooth" });
-      }
-    }
-
-    function handleNavKey(e){
-      if (!document.body.classList.contains("ready")) return;
-      if (modal.classList.contains("open")) return; // modal handles esc
-
-      if (e.key === "ArrowDown" || e.key === "j"){
-        e.preventDefault();
-        setSelected(selectedIndex + 1);
-      } else if (e.key === "ArrowUp" || e.key === "k"){
-        e.preventDefault();
-        setSelected(selectedIndex - 1);
-      } else if (e.key === "Enter"){
-        e.preventDefault();
-        openModal(selectedIndex);
-      }
-    }
-
-    window.addEventListener("keydown", handleNavKey);
-
-    // -----------------------------
-    // 4) Modal details
-    // -----------------------------
-    const modal = document.getElementById("modal");
-    const modalBackdrop = document.getElementById("modal-backdrop");
-    const modalClose = document.getElementById("modal-close");
-    const modalTitle = document.getElementById("modal-title");
-    const modalDesc = document.getElementById("modal-desc");
-    const modalProof = document.getElementById("modal-proof");
-    const modalLinks = document.getElementById("modal-links");
-    const modalMedia = document.getElementById("modal-media");
-
-    function openModal(idx){
-      const proj = PROJECTS_DATA[idx];
-      if (!proj) return;
-
-      modalTitle.textContent = proj.title;
-      modalDesc.textContent = proj.desc;
-
-      modalProof.innerHTML = "";
-      (proj.proof || []).forEach(line => {
-        const li = document.createElement("li");
-        li.textContent = line;
-        modalProof.appendChild(li);
-      });
-
-      modalLinks.innerHTML = "";
-      const linkDefs = [
-        ["code", "Code"],
-        ["demo", "Demo"],
-        ["writeup", "Writeup"]
-      ];
-      linkDefs.forEach(([key, label]) => {
-        const url = proj.links?.[key];
-        if (!url || url === "#") return;
-        const a = document.createElement("a");
-        a.className = "pill";
-        a.href = url;
-        a.target = "_blank";
-        a.rel = "noreferrer";
-        a.innerHTML = `<span>${label}</span>`;
-        modalLinks.appendChild(a);
-      });
-
-      modalMedia.innerHTML = "";
-      if (proj.thumb){
-        const img = document.createElement("img");
-        img.src = proj.thumb;
-        img.alt = proj.title;
-        modalMedia.appendChild(img);
-      } else {
-        const div = document.createElement("div");
-        div.className = "placeholder";
-        div.textContent = "ADD A THUMBNAIL / GIF";
-        modalMedia.appendChild(div);
-      }
-
-      modal.classList.add("open");
-      modal.setAttribute("aria-hidden", "false");
-    }
-
-    function closeModal(){
-      modal.classList.remove("open");
-      modal.setAttribute("aria-hidden", "true");
-    }
-
-    modalBackdrop.addEventListener("click", closeModal);
-    modalClose.addEventListener("click", closeModal);
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modal.classList.contains("open")){
-        e.preventDefault();
-        closeModal();
-      }
+    // Inject Nodes
+    const tree = document.getElementById('project-tree');
+    PROJECTS_DATA.forEach((p, i) => {
+      const a = document.createElement('a');
+      a.className = 'node';
+      a.href = "#";
+      a.innerHTML = `<span class="category-tag">${p.cat}</span><h3>${p.title}</h3><p>${p.desc}</p>`;
+      tree.appendChild(a);
     });
 
-    // -----------------------------
-    // 5) Subtle parallax on name + menu
-    // -----------------------------
-    const nameEl = document.getElementById("hero-name");
-    document.addEventListener("mousemove", (e) => {
-      if (!document.body.classList.contains("ready")) return;
+    // Intro Trigger
+    document.addEventListener('click', () => {
+      document.body.classList.add('ready');
+    }, {once: true});
 
-      const x = (e.clientX / window.innerWidth) - 0.5;
-      const y = (e.clientY / window.innerHeight) - 0.5;
-
-      nameEl.style.transform = `skewY(-5deg) rotate(-5deg) translate(${x * 16}px, ${y * 14}px)`;
-    });
-
-    // -----------------------------
-    // 6) THREE.JS BACKDROP (menu-y vibe)
-    // -----------------------------
-    const canvas = document.getElementById("bg-canvas");
+    // --- THREE.JS BACKDROP ---
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    camera.position.z = 18;
+    const geo = new THREE.IcosahedronGeometry(15, 1);
+    const mat = new THREE.MeshBasicMaterial({ color: 0xd32f2f, wireframe: true, transparent: true, opacity: 0.1 });
+    const mesh = new THREE.Mesh(geo, mat);
+    scene.add(mesh);
+    camera.position.z = 20;
 
-    // Lights: minimal
-    const ambient = new THREE.AmbientLight(0xffffff, 0.25);
-    scene.add(ambient);
-
-    // A few wireframes, not too "demo-y"
-    const wireMatRed = new THREE.MeshBasicMaterial({ color: 0xd32f2f, wireframe: true, transparent: true, opacity: 0.10 });
-    const wireMatWhite = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.06 });
-
-    function addWire(geom, mat, x, y, z){
-      const m = new THREE.Mesh(geom, mat);
-      m.position.set(x,y,z);
-      scene.add(m);
-      return m;
-    }
-
-    const g1 = new THREE.IcosahedronGeometry(12, 1);
-    const g2 = new THREE.TorusKnotGeometry(5.2, 1.0, 140, 12);
-    const g3 = new THREE.OctahedronGeometry(7.2, 1);
-
-    const a = addWire(g1, wireMatRed,   0, 0, 0);
-    const b = addWire(g2, wireMatWhite, -7, 5, -8);
-    const c = addWire(g3, wireMatRed,    9, -6, -10);
-
-    // Tiny particle dust
-    const pCount = 1000;
-    const pos = new Float32Array(pCount * 3);
-    for (let i=0; i<pCount*3; i+=3){
-      pos[i]   = (Math.random()-0.5) * 60;
-      pos[i+1] = (Math.random()-0.5) * 40;
-      pos[i+2] = (Math.random()-0.5) * 60;
-    }
-    const pGeom = new THREE.BufferGeometry();
-    pGeom.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    const pMat = new THREE.PointsMaterial({ size: 0.05, transparent: true, opacity: 0.35 });
-    const dust = new THREE.Points(pGeom, pMat);
-    scene.add(dust);
-
-    let mx = 0, my = 0, tx = 0, ty = 0;
-    document.addEventListener("mousemove", (e) => {
-      mx = (e.clientX / window.innerWidth) * 2 - 1;
-      my = -(e.clientY / window.innerHeight) * 2 + 1;
-    });
-
-    function animate(){
+    function animate() {
       requestAnimationFrame(animate);
-
-      // rotate slowly
-      a.rotation.y += 0.0012;
-      a.rotation.z += 0.0007;
-      b.rotation.x += 0.0010;
-      c.rotation.y -= 0.0009;
-
-      // subtle parallax camera
-      tx += (mx - tx) * 0.04;
-      ty += (my - ty) * 0.04;
-      camera.position.x = tx * 1.0;
-      camera.position.y = ty * 0.6;
-      camera.lookAt(0,0,0);
-
-      dust.rotation.y += 0.0006;
-
+      mesh.rotation.y += 0.001;
       renderer.render(scene, camera);
     }
     animate();
 
-    window.addEventListener("resize", () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+    // Parallax
+    document.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth) - 0.5;
+      const y = (e.clientY / window.innerHeight) - 0.5;
+      mesh.rotation.x = y * 0.5;
+      mesh.rotation.y = x * 0.5;
+      document.getElementById('hero-name').style.transform = `skewY(-5deg) rotate(-5deg) translate(${x*20}px, ${y*20}px)`;
     });
   </script>
 </body>
