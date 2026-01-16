@@ -1,271 +1,989 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Yiwei Wang | Portfolio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Unbounded:wght@800;900&display=swap" rel="stylesheet">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>Yiwei Wang | Quant / CS Portfolio</title>
 
   <style>
-    :root {
-      --p-red: #d32f2f;
-      --p-black: #050505;
-      --p-white: #f5f5f5;
-      --p-teal: #00ffd4;
-      --stroke: 3px;
-      --ease: cubic-bezier(.19,1,.22,1);
-      --ease2: cubic-bezier(.2,.9,.2,1);
+
+    :root{
+
+      --bg: #050505;
+
+      --fg: #f0f0f0;
+
+      --muted: rgba(240,240,240,.65);
+
+      --grid: rgba(240,240,240,.08);
+
+      --axis: rgba(240,240,240,.25);
+
+      --accent: #00ffd4;
+
+      --red: #d32f2f;
+
+
+
+      --strokeW: 3.2;
+
+      --ease: cubic-bezier(.2,.9,.2,1);
+
+      --step: 10; 
+
     }
 
-    /* Prevent accidental horizontal scroll */
-    * { margin:0; padding:0; box-sizing:border-box; cursor: crosshair; }
-    html, body { height: 100%; width: 100%; overflow: hidden; }
 
-    body {
-      background: var(--p-black);
-      color: var(--p-white);
-      font-family: 'Oswald', sans-serif;
-      background-image: url('https://www.transparenttextures.com/patterns/asfalt-dark.png');
+
+    *{ box-sizing:border-box; margin:0; padding:0; }
+
+    body{
+
+      background: #000;
+
+      color: var(--fg);
+
+      overflow: hidden; 
+
+      font-family: system-ui, -apple-system, Segoe UI, Inter, sans-serif;
+
+      transition: background 600ms ease;
+
     }
 
-    #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+    body.bg-ready{ background: var(--bg); }
 
-    /* --- UI CONTAINER --- */
-    #ui-layer {
-      position: relative;
-      z-index: 10;
-      height: 100vh;
-      width: 100vw;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 5%;
-      opacity: 0;
-      pointer-events: none;
-    }
 
-    body.ready #ui-layer { opacity: 1; pointer-events: auto; transition: opacity 0.5s ease; }
 
-    /* --- HERO NAME REFINEMENT --- */
-    #hero {
-      width: 40%;
-      z-index: 15; /* Keep name above project nodes slightly */
-    }
+    #world{
 
-    h1#hero-name {
-      font-family: 'Unbounded', sans-serif;
-      font-size: clamp(3rem, 6vw, 7rem);
-      text-transform: uppercase;
-      line-height: 0.85;
-      transform: skewY(-5deg) rotate(-5deg);
-      color: var(--p-white);
-      /* Stronger outline for contrast */
-      -webkit-text-stroke: 1.5px var(--p-red);
-      paint-order: stroke fill;
-      filter: drop-shadow(8px 8px 0 rgba(0,0,0,0.8));
-    }
-
-    .hero-sub {
-      margin-top: 30px;
-      font-size: 1.2rem;
-      text-transform: uppercase;
-      background: var(--p-black);
-      display: inline-block;
-      padding: 5px 10px;
-      transform: skewX(-10deg);
-    }
-
-    /* --- PROJECT LIST REFINEMENT --- */
-    #project-container {
-      width: 50%;
-      height: 75vh;
-      overflow-y: auto;
-      overflow-x: hidden; /* Fixes side-to-side bug */
-      padding: 60px 20px 150px 20px; /* Extra bottom padding for scroll space */
-      mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
-      -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
-    }
-
-    /* Custom Scrollbar */
-    #project-container::-webkit-scrollbar { width: 6px; }
-    #project-container::-webkit-scrollbar-thumb { background: var(--p-teal); }
-
-    .node {
-      background: var(--p-white);
-      color: var(--p-black);
-      margin-bottom: 35px;
-      padding: 20px 30px;
-      transform: skewX(-25deg);
-      transition: all 0.3s var(--ease);
-      position: relative;
-      left: 40px;
-      display: block;
-      text-decoration: none;
-      border-right: 12px solid var(--p-red);
-      box-shadow: 8px 8px 0 rgba(0,0,0,0.5);
-    }
-
-    .node:hover, .node.selected {
-      background: var(--p-red);
-      color: var(--p-white);
-      left: 10px;
-      box-shadow: -15px 0 0 var(--p-teal), 10px 10px 0 rgba(0,0,0,0.3);
-      border-right: 12px solid var(--p-white);
-    }
-
-    .node h3 {
-      transform: skewX(25deg);
-      font-size: 1.8rem;
-      text-transform: uppercase;
-      line-height: 1;
-    }
-
-    .node p {
-      transform: skewX(25deg);
-      font-size: 0.95rem;
-      margin-top: 8px;
-      font-weight: 500;
-    }
-
-    .category-tag {
-      background: var(--p-teal);
-      color: #000;
-      padding: 2px 10px;
-      font-size: 0.8rem;
-      font-weight: 900;
-      position: absolute;
-      top: -12px;
-      left: 15px;
-      transform: skewX(25deg);
-      box-shadow: 2px 2px 0 #000;
-    }
-
-    /* --- CONTACT BAR --- */
-    #contact-bar {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: var(--p-red);
-      padding: 15px 5%;
-      z-index: 100;
-      display: flex;
-      gap: 30px;
-      border-top: 4px solid var(--p-white);
-      transform: skewY(-1deg);
-    }
 
-    #contact-bar a {
-      color: white;
-      text-decoration: none;
-      font-weight: 900;
-      font-size: 1.2rem;
-    }
-
-    /* --- INTRO OVERLAY --- */
-    #intro {
-      position: fixed;
       inset: 0;
-      z-index: 999;
-      display: grid;
-      place-items: center;
-      background: var(--p-red);
-      transition: transform 0.8s var(--ease2);
-    }
-    body.ready #intro { transform: translateY(-100%); }
 
-    /* --- MOBILE FIXES --- */
-    @media (max-width: 860px) {
-      #ui-layer { flex-direction: column; padding-top: 50px; }
-      #hero { width: 100%; text-align: center; }
-      #project-container { width: 100%; height: 50vh; mask-image: none; }
-      .node { left: 0; margin-bottom: 25px; }
-      h1#hero-name { font-size: 3.5rem; }
+      overflow-x: auto;
+
+      overflow-y: hidden;
+
+      -webkit-overflow-scrolling: touch;
+
+      touch-action: pan-x;
+
+      scrollbar-color: rgba(240,240,240,.25) transparent;
+
+      scrollbar-width: thin;
+
+      overscroll-behavior: none;
+
     }
+
+    #world::-webkit-scrollbar{ height: 10px; }
+
+    #world::-webkit-scrollbar-track{ background: transparent; }
+
+    #world::-webkit-scrollbar-thumb{
+
+      background: rgba(240,240,240,.18);
+
+      border-radius: 999px;
+
+    }
+
+
+
+    #stage{
+
+      height: 100vh;
+
+      width: max(1800px, 260vw);
+
+      display:block;
+
+    }
+
+
+
+    #grain{
+
+      position: fixed;
+
+      inset: -40px;
+
+      pointer-events:none;
+
+      background:
+
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,.05), transparent 45%),
+
+        radial-gradient(circle at 70% 70%, rgba(255,255,255,.04), transparent 50%),
+
+        radial-gradient(circle at 50% 10%, rgba(255,255,255,.03), transparent 40%);
+
+      mix-blend-mode: overlay;
+
+      opacity: .55;
+
+      z-index: 4;
+
+    }
+
+
+
+    #ui{
+
+      position: fixed;
+
+      inset: 0;
+
+      pointer-events:none;
+
+      opacity: 0;
+
+      transform: translateY(10px);
+
+      transition: opacity 600ms var(--ease), transform 600ms var(--ease);
+
+      z-index: 10;
+
+    }
+
+    body.ready #ui{
+
+      opacity: 1;
+
+      transform: translateY(0);
+
+    }
+
+
+
+    #topbar{
+
+      pointer-events:auto;
+
+      position:absolute;
+
+      top: 16px;
+
+      left: 16px;
+
+      right: 16px;
+
+      display:flex;
+
+      justify-content:space-between;
+
+      align-items:center;
+
+      gap: 12px;
+
+      flex-wrap: wrap;
+
+    }
+
+
+
+    .badge{
+
+      padding: 10px 12px;
+
+      border: 1px solid rgba(240,240,240,.16);
+
+      border-radius: 14px;
+
+      background: rgba(255,255,255,.03);
+
+      backdrop-filter: blur(6px);
+
+      font-weight: 800;
+
+      letter-spacing: .02em;
+
+    }
+
+    .badge small{ color: var(--muted); font-weight: 700; letter-spacing: .06em; margin-left: 8px; }
+
+
+
+    .actions{ display:flex; gap: 10px; }
+
+    .btn{
+
+      pointer-events:auto;
+
+      padding: 10px 12px;
+
+      border-radius: 14px;
+
+      border: 1px solid rgba(240,240,240,.16);
+
+      background: rgba(255,255,255,.03);
+
+      color: var(--fg);
+
+      text-decoration:none;
+
+      font-weight: 800;
+
+      letter-spacing: .04em;
+
+      transition: all 180ms ease;
+
+      cursor: pointer;
+
+    }
+
+    .btn:hover{
+
+      border-color: rgba(0,255,212,.5);
+
+      color: var(--accent);
+
+      transform: translateY(-1px);
+
+    }
+
+
+
+    #scrollIndicator{
+
+      pointer-events: auto;
+
+      position: absolute;
+
+      right: 24px;
+
+      top: 50%;
+
+      transform: translateY(-50%);
+
+      display: flex;
+
+      flex-direction: column;
+
+      align-items: center;
+
+      gap: 8px;
+
+      padding: 14px 12px;
+
+      border: 1px solid rgba(240,240,240,.16);
+
+      border-radius: 16px;
+
+      background: rgba(255,255,255,.03);
+
+      backdrop-filter: blur(6px);
+
+      transition: opacity 400ms var(--ease);
+
+    }
+
+    #scrollIndicator.hidden{ opacity: 0; pointer-events: none; }
+
+    #scrollIndicator .text{
+
+      color: var(--accent);
+
+      font-weight: 900;
+
+      letter-spacing: .12em;
+
+      text-transform: uppercase;
+
+      font-size: .75rem;
+
+      writing-mode: vertical-rl;
+
+    }
+
+    #scrollIndicator .arrow{
+
+      width: 0; height: 0;
+
+      border-left: 6px solid transparent;
+
+      border-right: 6px solid transparent;
+
+      border-top: 8px solid var(--accent);
+
+      transform: rotate(-90deg);
+
+      animation: bounce 1.5s ease-in-out infinite;
+
+    }
+
+
+
+    @keyframes bounce{
+
+      0%, 100%{ opacity: 0.3; transform: rotate(-90deg) translateX(0); }
+
+      50%{ opacity: 1; transform: rotate(-90deg) translateX(4px); }
+
+    }
+
+
+
+    #panel{
+
+      pointer-events:auto;
+
+      position:absolute;
+
+      width: min(400px, calc(100vw - 32px));
+
+      border-radius: 18px;
+
+      border: 1px solid rgba(240,240,240,.16);
+
+      background: rgba(255,255,255,.05);
+
+      backdrop-filter: blur(12px);
+
+      padding: 16px 16px 14px;
+
+      box-shadow: 0 18px 55px rgba(0,0,0,.45);
+
+      display:none;
+
+      z-index: 100;
+
+    }
+
+    #panel.open{ display:block; }
+
+    #panel h3{ margin: 0 0 6px; font-size: 1.2rem; }
+
+    #panel .meta{ color: var(--accent); font-weight: 900; font-size: .85rem; margin-bottom: 8px; }
+
+    #panel ul{ padding-left: 18px; margin-bottom: 12px; }
+
+    #panel .links a{ margin-right: 10px; color: var(--accent); font-weight: 900; text-decoration:none; }
+
+    #panel .close{
+
+      position:absolute; top: 10px; right: 10px;
+
+      border: 1px solid rgba(240,240,240,.2);
+
+      background: rgba(0,0,0,.25); color: var(--fg);
+
+      padding: 6px 10px; border-radius: 12px; cursor:pointer;
+
+    }
+
+
+
+    .grid line{ 
+
+      stroke: var(--grid); 
+
+      stroke-width: 1;
+
+      opacity: 0;
+
+      transition: opacity 400ms ease;
+
+    }
+
+    .grid .major{ stroke: rgba(240,240,240,.12); stroke-width: 1.5; }
+
+    .grid line.show{ opacity: 1; }
+
+    
+
+    .axis line{ 
+
+      stroke: var(--axis); 
+
+      stroke-width: 2;
+
+      stroke-dasharray: 1000;
+
+      stroke-dashoffset: 1000;
+
+    }
+
+    .axis line.draw-axis{
+
+      animation: drawAxisAnim 1400ms cubic-bezier(.2,.9,.2,1) forwards;
+
+    }
+
+    @keyframes drawAxisAnim{ 
+
+      to { stroke-dashoffset: 0; } 
+
+    }
+
+    
+
+    .tick{ 
+
+      stroke: rgba(240,240,240,.18); 
+
+      stroke-width: 1;
+
+      opacity: 0;
+
+    }
+
+    .tick.show{ opacity: 1; transition: opacity 300ms ease; }
+
+
+
+    .intro-stroke{
+
+      fill: none;
+
+      stroke: var(--fg);
+
+      stroke-width: var(--strokeW);
+
+      stroke-linecap: round;
+
+      stroke-linejoin: round;
+
+      stroke-dasharray: var(--len);
+
+      stroke-dashoffset: var(--len);
+
+      opacity: 0;
+
+    }
+
+    
+
+    .intro-stroke.animate{
+
+      opacity: 1;
+
+      animation: drawStroke 800ms var(--ease) forwards;
+
+    }
+
+    
+
+    @keyframes drawStroke{ 
+
+      to { stroke-dashoffset: 0; } 
+
+    }
+
+
+
+    .point{ opacity: 0; transform-origin: center; }
+
+    body.ready .point{ animation: popIn 520ms var(--ease) forwards; animation-delay: var(--pdelay); }
+
+    @keyframes popIn{ from{ opacity:0; transform: scale(.82); } to{ opacity:1; transform: scale(1); } }
+
+
+
+    .point circle{ fill: var(--red); stroke: rgba(0,0,0,.6); stroke-width: 2; transition: all 200ms ease; }
+
+    .point text{
+
+      fill: rgba(240,240,240,.88); font-size: 12px; font-weight: 950;
+
+      letter-spacing: .10em; text-transform: uppercase; pointer-events: none;
+
+      paint-order: stroke; stroke: rgba(0,0,0,.55); stroke-width: 2.2px;
+
+    }
+
+
+
+    @media (max-width: 640px){
+
+      #topbar{ flex-direction: column; align-items: stretch; }
+
+      .actions{ justify-content: center; }
+
+      #stage{ width: max(1400px, 320vw); }
+
+    }
+
   </style>
+
 </head>
+
+
+
 <body>
 
-  <canvas id="bg-canvas"></canvas>
+  <div id="world">
 
-  <div id="intro">
-    <div style="text-align:center; transform: rotate(-3deg);">
-      <h2 style="font-family:'Unbounded'; font-size: 3rem; -webkit-text-stroke: 1px #fff;">INITIALIZING</h2>
-      <p style="font-weight:700; letter-spacing: 5px;">CLICK TO AWAKEN</p>
-    </div>
+    <svg id="stage" viewBox="-120 -70 720 140" preserveAspectRatio="xMinYMid meet">
+
+      <g class="grid" id="grid"></g>
+
+      <g class="axis">
+
+        <line id="xAxisRight" x1="0" y1="0" x2="600" y2="0"></line>
+
+        <line id="xAxisLeft" x1="0" y1="0" x2="-120" y2="0"></line>
+
+        <line id="yAxisUp" x1="0" y1="0" x2="0" y2="-70"></line>
+
+        <line id="yAxisDown" x1="0" y1="0" x2="0" y2="70"></line>
+
+      </g>
+
+      <g id="ticks"></g>
+
+      <g id="intro"></g>
+
+      <g id="points"></g>
+
+    </svg>
+
   </div>
 
-  <div id="ui-layer">
-    <div id="hero">
-      <h1 id="hero-name">YIWEI<br>WANG</h1>
-      <div class="hero-sub">Research • CS • Quant</div>
+
+
+  <div id="grain"></div>
+
+
+
+  <div id="ui">
+
+    <div id="topbar">
+
+      <div class="badge">Yiwei Wang <small>Quant • CS • Research</small></div>
+
+      <div class="actions">
+
+        <a class="btn" href="mailto:yiweiwang2007@gmail.com">Email</a>
+
+        <a class="btn" href="https://github.com/yiweipwang" target="_blank">GitHub</a>
+
+        <a class="btn" href="https://linkedin.com/in/yiwei-wang-12bb88285" target="_blank">LinkedIn</a>
+
+      </div>
+
     </div>
 
-    <div id="project-container">
-      <div id="project-tree">
-        </div>
+    <div id="scrollIndicator">
+
+      <div class="text">Scroll</div>
+
+      <div class="arrow"></div>
+
     </div>
+
+    <div id="panel">
+
+      <button class="close" id="closePanel">ESC</button>
+
+      <div class="meta" id="pMeta"></div>
+
+      <h3 id="pTitle"></h3>
+
+      <p id="pDesc"></p>
+
+      <ul id="pProof"></ul>
+
+      <div class="links" id="pLinks"></div>
+
+    </div>
+
   </div>
 
-  <div id="contact-bar">
-    <a href="mailto:yiweiwang2007@gmail.com">EMAIL</a>
-    <a href="https://github.com/yiweipwang">GITHUB</a>
-    <a href="#">LINKEDIN</a>
-  </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
   <script>
-    const PROJECTS_DATA = [
-      { title: "Minesweeper", cat: "CS PROJECT", desc: "JavaFX Minesweeper with explainable hints + AI opponent systems." },
-      { title: "Sound Space", cat: "GAME DEV", desc: "Rhythm game: beat detection → synced gameplay + timing windows." },
-      { title: "Combinatorics", cat: "RESEARCH", desc: "Hex-board tiling patterns; generalized recurrence + OEIS entry." },
-      { title: "Quant Finance", cat: "QUANT", desc: "Market microstructure / modeling projects and experiments." },
-      { title: "Signal Analysis", cat: "RESEARCH", desc: "Fourier transforms and spectral analysis for market data." }
-    ];
 
-    // Inject Nodes
-    const tree = document.getElementById('project-tree');
-    PROJECTS_DATA.forEach((p, i) => {
-      const a = document.createElement('a');
-      a.className = 'node';
-      a.href = "#";
-      a.innerHTML = `<span class="category-tag">${p.cat}</span><h3>${p.title}</h3><p>${p.desc}</p>`;
-      tree.appendChild(a);
-    });
+    const STEP = 10;
 
-    // Intro Trigger
-    document.addEventListener('click', () => {
-      document.body.classList.add('ready');
-    }, {once: true});
+    const MAJOR_EVERY = 50;
 
-    // --- THREE.JS BACKDROP ---
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    const svg = document.getElementById("stage");
 
-    const geo = new THREE.IcosahedronGeometry(15, 1);
-    const mat = new THREE.MeshBasicMaterial({ color: 0xd32f2f, wireframe: true, transparent: true, opacity: 0.1 });
-    const mesh = new THREE.Mesh(geo, mat);
-    scene.add(mesh);
-    camera.position.z = 20;
+    const world = document.getElementById("world");
 
-    function animate() {
-      requestAnimationFrame(animate);
-      mesh.rotation.y += 0.001;
-      renderer.render(scene, camera);
+    const gridG = document.getElementById("grid");
+
+    const ticksG = document.getElementById("ticks");
+    
+world.addEventListener("wheel", (e) => {
+  if (e.shiftKey) return;
+  e.preventDefault();
+  const speed = 1.6;
+  world.scrollLeft += e.deltaY * speed;
+}, { passive: false });
+
+world.addEventListener("wheel", (e) => {
+  if (e.shiftKey) return;
+  e.preventDefault();
+  const speed = 1.6;
+  const dx = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+  world.scrollLeft += dx * speed;
+}, { passive: false });
+
+
+    // 1) Background Grid Setup
+
+    const vb = svg.viewBox.baseVal;
+
+    const X0 = vb.x, X1 = vb.x + vb.width, Y0 = vb.y, Y1 = vb.y + vb.height;
+
+    const mkLine = (x1,y1,x2,y2, cls) => {
+
+      const el = document.createElementNS("http://www.w3.org/2000/svg","line");
+
+      el.setAttribute("x1", x1); el.setAttribute("y1", y1);
+
+      el.setAttribute("x2", x2); el.setAttribute("y2", y2);
+
+      if (cls) el.setAttribute("class", cls);
+
+      return el;
+
+    };
+
+
+
+    const verticals = [], horizontals = [];
+
+    for(let x = Math.ceil(X0/STEP)*STEP; x <= X1; x += STEP){
+
+      verticals.push(mkLine(x, Y0, x, Y1, Math.abs(x)%MAJOR_EVERY===0?"major":null));
+
     }
-    animate();
 
-    // Parallax
-    document.addEventListener('mousemove', (e) => {
-      const x = (e.clientX / window.innerWidth) - 0.5;
-      const y = (e.clientY / window.innerHeight) - 0.5;
-      mesh.rotation.x = y * 0.5;
-      mesh.rotation.y = x * 0.5;
-      document.getElementById('hero-name').style.transform = `skewY(-5deg) rotate(-5deg) translate(${x*20}px, ${y*20}px)`;
+    for(let y = Math.ceil(Y0/STEP)*STEP; y <= Y1; y += STEP){
+
+      horizontals.push(mkLine(X0, y, X1, y, Math.abs(y)%MAJOR_EVERY===0?"major":null));
+
+    }
+
+    verticals.forEach(l => gridG.appendChild(l));
+
+    horizontals.forEach(l => gridG.appendChild(l));
+
+
+
+    for(let x = Math.ceil(X0/20)*20; x <= X1; x += 20) if(x!==0) ticksG.appendChild(mkLine(x, -2, x, 2, "tick"));
+
+    for(let y = Math.ceil(Y0/20)*20; y <= Y1; y += 20) if(y!==0) ticksG.appendChild(mkLine(-2, y, 2, y, "tick"));
+
+
+
+    // 2) Intro Drawing Logic
+
+    const NS = "http://www.w3.org/2000/svg";
+
+    const snap = (v) => Math.round(v / STEP) * STEP;
+
+    const S = (v) => snap(v);
+
+    const lineStroke = (x1,y1,x2,y2) => `M ${x1} ${y1} L ${x2} ${y2}`;
+
+    const polyStroke = (pts) => pts.map((p, i) => (i===0?`M ${p[0]} ${p[1]}`:`L ${p[0]} ${p[1]}`)).join(" ");
+
+
+
+    function addLetter(letter, x0, y0, w, h){
+
+      const X = (dx)=> S(x0 + dx), Y = (dy)=> S(y0 + dy);
+
+      const top=0, mid=h/2, bot=h, left=0, right=w, cx=w/2;
+
+      const segs = [];
+
+
+
+      if(letter === "Y"){
+
+        segs.push(lineStroke(X(left), Y(top), X(cx), Y(mid)));
+
+        segs.push(lineStroke(X(right), Y(top), X(cx), Y(mid)));
+
+        segs.push(lineStroke(X(cx), Y(mid), X(cx), Y(bot)));
+
+      }
+
+      if(letter === "I"){
+
+        segs.push(lineStroke(X(cx), Y(top), X(cx), Y(bot)));
+
+        segs.push(lineStroke(X(left), Y(top), X(right), Y(top)));
+
+        segs.push(lineStroke(X(left), Y(bot), X(right), Y(bot)));
+
+      }
+
+      if(letter === "W"){
+
+        segs.push(polyStroke([[X(left), Y(top)], [X(w*0.3), Y(bot)], [X(cx), Y(mid)], [X(right), Y(bot)], [X(right), Y(top)]]));
+
+      }
+
+      if(letter === "E"){
+
+        segs.push(lineStroke(X(left), Y(top), X(left), Y(bot)));
+
+        segs.push(lineStroke(X(left), Y(top), X(right), Y(top)));
+
+        segs.push(lineStroke(X(left), Y(mid), X(right-5), Y(mid)));
+
+        segs.push(lineStroke(X(left), Y(bot), X(right), Y(bot)));
+
+      }
+
+      if(letter === "A"){
+
+        segs.push(lineStroke(X(left), Y(bot), X(cx), Y(top)));
+
+        segs.push(lineStroke(X(cx), Y(top), X(right), Y(bot)));
+
+        segs.push(lineStroke(X(w*0.25), Y(mid+5), X(w*1.2), Y(mid+5)));
+
+      }
+
+      if(letter === "N"){
+
+        segs.push(lineStroke(X(left), Y(bot), X(left), Y(top)));
+
+        segs.push(lineStroke(X(left), Y(top), X(right), Y(bot)));
+
+        segs.push(lineStroke(X(right), Y(bot), X(right), Y(top)));
+
+      }
+
+      if(letter === "G"){
+
+        segs.push(polyStroke([[X(right), Y(top+5)], [X(right), Y(top)], [X(left), Y(top)], [X(left), Y(bot)], [X(right), Y(bot)], [X(right), Y(mid)], [X(cx), Y(mid)]]));
+
+      }
+
+      return segs;
+
+    }
+
+
+
+    const introG = document.getElementById("intro");
+
+    const L_W = 15, L_H = 40, G = 5;
+
+    let strokes = [];
+
+    
+
+    // QII: YIWEI
+
+    "YIWEI".split('').forEach((l, i) => strokes.push(...addLetter(l, -110 + i*(L_W+G), -50, L_W, L_H)));
+
+    // QIII: WANG
+
+    "WANG".split('').forEach((l, i) => strokes.push(...addLetter(l, -100 + i*(L_W+G), 10, L_W, L_H)));
+
+
+
+    const strokePaths = [];
+
+    strokes.forEach((d, i) => {
+
+      const p = document.createElementNS(NS,"path");
+
+      p.setAttribute("d", d);
+
+      p.setAttribute("class", "intro-stroke");
+
+      introG.appendChild(p);
+
+      const len = p.getTotalLength();
+
+      p.style.setProperty("--len", len.toFixed(2));
+
+      p.style.setProperty("--delay", `${i*130}ms`);
+
+      strokePaths.push(p);
+
     });
+
+
+
+    // 3) Projects
+
+    const PROJECTS = [
+
+      { id:"ms", label:"Minesweeper", cat:"CS", x:50, y:-30, desc:"JavaFX logic with AI hints.", proof:["BFS auto-reveal","Probability scoring"], links:{code:"#"} },
+
+      { id:"qt", label:"Quant Lab", cat:"QUANT", x:250, y:-10, desc:"Backtesting framework.", proof:["Metrics-driven","Risk analysis"], links:{code:"#"} },
+
+      { id:"ss", label:"Sound Space", cat:"GAME", x:150, y:30, desc:"Rhythm mechanics.", proof:["Beat detection","Scoring loop"], links:{code:"#"} },
+
+      { id:"cb", label:"Combinatorics", cat:"RESEARCH", x:40, y:50, desc:"Hex tilings & OEIS.", proof:["OEIS A365352","Recurrence derivation"], links:{writeup:"#"} }
+
+    ].map(p => ({ ...p, x: snap(p.x), y: snap(p.y) }));
+
+
+
+    const pointsG = document.getElementById("points");
+
+    PROJECTS.forEach((p, i) => {
+
+      const g = document.createElementNS(NS, "g");
+
+      g.setAttribute("class", "point");
+
+      g.style.setProperty("--pdelay", `${200 + i*100}ms`);
+
+      const c = document.createElementNS(NS, "circle");
+
+      c.setAttribute("cx", p.x); c.setAttribute("cy", p.y); c.setAttribute("r", 4);
+
+      const t = document.createElementNS(NS, "text");
+
+      t.setAttribute("x", p.x + 10); t.setAttribute("y", p.y + 4);
+
+      t.textContent = p.label.toUpperCase();
+
+      g.style.cursor = "pointer";
+
+      g.onclick = () => openPanel(p);
+
+      g.appendChild(c); g.appendChild(t); pointsG.appendChild(g);
+
+    });
+
+
+
+    // 4) UI Handlers
+
+    const panel = document.getElementById("panel");
+
+    function openPanel(p){
+
+      panel.classList.add("open");
+
+      document.getElementById("pMeta").textContent = p.cat;
+
+      document.getElementById("pTitle").textContent = p.label;
+
+      document.getElementById("pDesc").textContent = p.desc;
+
+      const list = document.getElementById("pProof");
+
+      list.innerHTML = "";
+
+      p.proof.forEach(s => { const li=document.createElement("li"); li.textContent=s; list.appendChild(li); });
+
+      
+
+      const pt = svg.createSVGPoint();
+
+      pt.x = p.x; pt.y = p.y;
+
+      const screen = pt.matrixTransform(svg.getScreenCTM());
+
+      panel.style.left = `${Math.min(window.innerWidth-420, Math.max(20, screen.x+20))}px`;
+
+      panel.style.top = `${Math.min(window.innerHeight-300, Math.max(80, screen.y-100))}px`;
+
+    }
+
+    document.getElementById("closePanel").onclick = () => panel.classList.remove("open");
+
+    world.addEventListener("scroll", () => world.scrollLeft > 50 ? document.getElementById("scrollIndicator").classList.add("hidden") : null);
+
+
+
+    // 5) Master Animation Sequence
+
+    function animateScene(){
+
+      // Phase 1: Axes extending from origin in 4 directions
+
+      setTimeout(() => {
+
+        document.getElementById("xAxisRight").classList.add("draw-axis");
+
+        document.getElementById("xAxisLeft").classList.add("draw-axis");
+
+        document.getElementById("yAxisUp").classList.add("draw-axis");
+
+        document.getElementById("yAxisDown").classList.add("draw-axis");
+
+        document.body.classList.add("bg-ready");
+
+      }, 200);
+
+
+
+      // Phase 2: Grid lines from axes
+
+      setTimeout(() => {
+
+        verticals.forEach((line) => {
+
+          const x = parseFloat(line.getAttribute("x1"));
+
+          const dist = Math.abs(x);
+
+          setTimeout(() => line.classList.add("show"), dist * 1.5);
+
+        });
+
+        
+
+        horizontals.forEach((line) => {
+
+          const y = parseFloat(line.getAttribute("y1"));
+
+          const dist = Math.abs(y);
+
+          setTimeout(() => line.classList.add("show"), dist * 1.5);
+
+        });
+
+
+
+        setTimeout(() => {
+
+          Array.from(ticksG.children).forEach(t => t.classList.add("show"));
+
+        }, 400);
+
+      }, 600);
+
+
+
+      // Phase 3: Name drawing
+
+      setTimeout(() => {
+
+        strokePaths.forEach(p => p.classList.add("animate"));
+
+      }, 1300);
+
+
+
+      // Phase 4: UI + Projects
+
+      setTimeout(() => {
+
+        document.body.classList.add("ready");
+
+      }, 1500);
+
+    }
+
+
+
+    animateScene();
+
   </script>
+
 </body>
+
 </html>
