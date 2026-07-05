@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tilings of hexagonal boards — Yiwei Wang</title>
+  <meta name="description" content="Combinatorics research generalizing Fibonacci tiling theory to hexagonal strips, with a recursive solution counted by Narayana's cows sequence, published as OEIS A365352.">
+  <link rel="canonical" href="https://yiweipwang.github.io/projects/hexagonal-tilings/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Tilings of hexagonal boards — Yiwei Wang">
+  <meta property="og:description" content="Generalizing Fibonacci tiling theory to hexagonal strips. Published as OEIS A365352.">
+  <meta property="og:url" content="https://yiweipwang.github.io/projects/hexagonal-tilings/">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=Public+Sans:wght@400;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="shell">
+      <a class="wordmark" href="/">Yiwei Wang</a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="/#work">Work</a>
+        <a href="/#about">About</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <header class="case-header shell">
+      <a class="back-link" href="/#work">&larr; All work</a>
+      <h1>Tilings of hexagonal boards</h1>
+      <p class="lede">
+        What happens to the classic "tile a board, get Fibonacci" result when
+        the board is made of hexagons instead of squares? It turns out a
+        different — and older — sequence shows up.
+      </p>
+    </header>
+
+    <div class="shell">
+      <dl class="facts">
+        <div>
+          <dt>Year</dt>
+          <dd>2023</dd>
+        </div>
+        <div>
+          <dt>Type</dt>
+          <dd>Independent research</dd>
+        </div>
+        <div>
+          <dt>Tools</dt>
+          <dd>Pen &amp; paper, Python, LaTeX</dd>
+        </div>
+        <div>
+          <dt>Published</dt>
+          <dd><a href="https://oeis.org/A365352">OEIS A365352</a></dd>
+        </div>
+      </dl>
+    </div>
+
+    <article class="shell prose">
+      <h2>The question</h2>
+      <p>
+        A well-known introductory result in combinatorics says that the number
+        of ways to tile a <code>1&times;n</code> strip of squares with squares
+        and dominoes is the Fibonacci number <code>F(n+1)</code>. The squares
+        version is thoroughly studied; I wanted to know how the structure
+        changes when the underlying board is a strip of hexagonal cells, where
+        each cell touches its neighbors along edges in a staggered, two-row
+        pattern rather than in a single line.
+      </p>
+
+      <h2>The approach</h2>
+      <p>
+        I enumerated tilings of small hexagonal strips by hand to get trustworthy
+        initial terms, then wrote a short Python brute-forcer to extend the
+        sequence far enough to conjecture a pattern. The counts didn't match
+        Fibonacci — but they satisfied a clean third-order recurrence. The
+        sequence turned out to be governed by Narayana's cows,
+        <code>a(n) = a(n&minus;1) + a(n&minus;3)</code>, a recurrence first posed
+        as a 14th-century cattle-breeding puzzle. The geometry explains the lag:
+        on the hexagonal strip, one family of tile placements commits cells
+        three steps ahead instead of two, which is exactly what shifts the
+        Fibonacci-style recurrence from order 2 to order 3.
+      </p>
+      <p>
+        From there I proved the recurrence directly with a case analysis on how
+        the leftmost cell of the strip can be covered, mirroring the standard
+        Fibonacci tiling proof but adapted to hexagonal adjacency.
+      </p>
+      <!-- TODO: if you have the writeup or proof PDF, link it here. A diagram
+           of the three cases in the recurrence would be a strong Figure 2. -->
+
+      <h2>The result</h2>
+      <p>
+        The sequence was new to the On-Line Encyclopedia of Integer Sequences
+        and is now published as
+        <a href="https://oeis.org/A365352">A365352</a>, with the recurrence,
+        initial terms, and tiling interpretation on record. The OEIS is the
+        standard reference database for integer sequences, so the result is
+        citable and independently checkable — which is my favorite property a
+        project can have.
+      </p>
+
+      <h2>What I took from it</h2>
+      <p>
+        Two things. First, brute force is a legitimate research instrument:
+        the Python enumerator didn't prove anything, but it told me exactly
+        what to try to prove. Second, recurrences are a place where math and
+        programming are the same activity — the case analysis in the proof and
+        the branching in the enumerator are literally the same tree.
+      </p>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell">
+      <ul class="contact-links">
+        <li><a href="mailto:yiweiwang2007@gmail.com">yiweiwang2007@gmail.com</a></li>
+        <li><a href="https://github.com/yiweipwang">GitHub</a></li>
+        <li><a href="https://linkedin.com/in/yiwei-wang-12bb88285">LinkedIn</a></li>
+      </ul>
+      <p class="meta">© 2026 Yiwei Wang · Providence, RI</p>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EMA Crossover Momentum Strategy — Yiwei Wang</title>
+  <meta name="description" content="Long/short EMA crossover strategy backtested on 10 years of intraday AAPL data, with slippage and commission modelling and a full visualization suite.">
+  <link rel="canonical" href="https://yiweipwang.github.io/projects/ema-crossover/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="EMA Crossover Momentum Strategy — Yiwei Wang">
+  <meta property="og:description" content="Long/short EMA(20)/EMA(50) crossover backtested on 10 years of intraday AAPL data.">
+  <meta property="og:url" content="https://yiweipwang.github.io/projects/ema-crossover/">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=Public+Sans:wght@400;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="shell">
+      <a class="wordmark" href="/">Yiwei Wang</a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="/#work">Work</a>
+        <a href="/#about">About</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <header class="case-header shell">
+      <a class="back-link" href="/#work">&larr; All work</a>
+      <h1>EMA crossover momentum strategy</h1>
+      <p class="lede">
+        A long/short EMA(20)/EMA(50) crossover strategy backtested across 10 years
+        of intraday AAPL data. The system resamples 1-minute bars to any timeframe,
+        enforces a market-hours filter, models transaction costs per fill, and
+        outputs a full trade log and visualization suite.
+      </p>
+    </header>
+
+    <div class="shell">
+      <dl class="facts">
+        <div>
+          <dt>Year</dt>
+          <dd>2026</dd>
+        </div>
+        <div>
+          <dt>Type</dt>
+          <dd>Quantitative finance</dd>
+        </div>
+        <div>
+          <dt>Stack</dt>
+          <dd>Python, pandas, matplotlib</dd>
+        </div>
+        <div>
+          <dt>Code</dt>
+          <dd><a href="https://github.com/yiweipwang/ema-crossover">GitHub</a></dd>
+        </div>
+      </dl>
+    </div>
+
+    <article class="shell prose">
+      <h2>The strategy</h2>
+      <p>
+        EMA crossover is one of the most studied momentum signals: go long when the
+        fast exponential moving average crosses above the slow one, go short when it
+        crosses below. The strategy is always in the market — there is no cash period —
+        which makes it a clean test of whether the signal has any forecasting power
+        at all, because there is nowhere to hide in flat markets.
+      </p>
+      <p>
+        I chose EMA(20) and EMA(50) on weekly bars resampled from a 1-minute
+        AAPL feed. The weekly timeframe removes most of the intraday microstructure
+        noise while still generating enough crossovers to measure over a decade.
+      </p>
+
+      <h2>Implementation</h2>
+      <p>
+        The strategy is a single self-contained Python file. It reads a 1-minute
+        OHLCV CSV, resamples it to the target timeframe using pandas
+        <code>resample()</code>, computes the two EMAs on close prices, generates
+        long/short signals at each crossover, and simulates trade execution bar by bar.
+        Changing the timeframe — from 1-minute to weekly — requires only changing
+        one string in <code>__main__</code>.
+      </p>
+      <p>
+        A market-hours filter masks signals outside 09:30–16:00 Eastern. Any position
+        open at the last valid bar of a session is force-closed at that bar's close,
+        eliminating overnight exposure. This made the cost accounting cleaner and
+        the results more realistic.
+      </p>
+
+      <h2>Cost modelling</h2>
+      <p>
+        Each fill incurs $0.01 slippage and $0.005 commission, giving a $0.03
+        round-trip cost. With 46 trades over the backtest period, total costs
+        were $1.38, dragging net return by 0.75 percentage points. The system
+        writes separate gross and net trade books so cost impact is always visible.
+      </p>
+
+      <h2>Results (weekly bars, 10-year AAPL)</h2>
+      <p>
+        The strategy produced a 20.5% total gross return (1.96% annualized, Sharpe
+        0.29) with a maximum drawdown of 11.0%. Buy-and-hold over the same period
+        returned 639% — the crossover signal substantially underperforms passive
+        exposure to a secular growth stock. The more useful comparison is the
+        drawdown: the strategy's 11% max drawdown against buy-and-hold's 38.6%
+        shows the signal does provide some downside protection via its short leg,
+        even if it sacrifices most of the upside.
+      </p>
+
+      <h2>Visualization</h2>
+      <p>
+        A companion script reads the six output CSVs and produces charts: the
+        price series with EMA overlays and trade entry/exit markers, the equity
+        curve gross vs net vs buy-and-hold, and the per-trade profit distribution.
+        The visualizer is separate from the strategy engine so the charting code
+        never touches live data.
+      </p>
+
+      <h2>What I took from it</h2>
+      <p>
+        The most useful lesson was how little a popular signal can actually do on
+        a stock that moved 640% in a decade: the crossover's mean-reversion
+        instincts actively fight the trend that makes AAPL interesting to own.
+        That is not a flaw in the implementation — it is the correct answer, and
+        getting the infrastructure right made the answer legible. The project also
+        reinforced the value of separating the strategy engine from the reporting
+        layer: the visualizer required zero changes to the strategy code, which
+        meant I could iterate on charts without worrying about accidentally
+        introducing a bug in the signal logic.
+      </p>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell">
+      <ul class="contact-links">
+        <li><a href="mailto:yiweiwang2007@gmail.com">yiweiwang2007@gmail.com</a></li>
+        <li><a href="https://github.com/yiweipwang">GitHub</a></li>
+        <li><a href="https://linkedin.com/in/yiwei-wang-12bb88285">LinkedIn</a></li>
+      </ul>
+      <p class="meta">© 2026 Yiwei Wang · Providence, RI</p>
+    </div>
+  </footer>
+</body>
+</html>

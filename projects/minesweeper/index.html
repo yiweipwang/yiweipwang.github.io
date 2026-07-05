@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minesweeper, with an opponent — Yiwei Wang</title>
+  <meta name="description" content="A Java/JavaFX Minesweeper with a tutorial mode, a hint engine, and an AI opponent built on BFS flood reveal and tree-based mine-probability analysis.">
+  <link rel="canonical" href="https://yiweipwang.github.io/projects/minesweeper/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Minesweeper, with an opponent — Yiwei Wang">
+  <meta property="og:description" content="Tutorial, hint, and AI-opponent systems on top of a classic, built in Java/JavaFX.">
+  <meta property="og:url" content="https://yiweipwang.github.io/projects/minesweeper/">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=Public+Sans:wght@400;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="shell">
+      <a class="wordmark" href="/">Yiwei Wang</a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="/#work">Work</a>
+        <a href="/#about">About</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <header class="case-header shell">
+      <a class="back-link" href="/#work">&larr; All work</a>
+      <h1>Minesweeper, with an opponent</h1>
+      <p class="lede">
+        The classic game, plus the three things the classic game never gives
+        you: a tutorial that teaches the logic, a hint when you're stuck, and
+        an opponent that plays the same board against you.
+      </p>
+    </header>
+
+    <div class="shell">
+      <dl class="facts">
+        <div>
+          <dt>Year</dt>
+          <dd>2024</dd>
+        </div>
+        <div>
+          <dt>Type</dt>
+          <dd>Game + AI systems</dd>
+        </div>
+        <div>
+          <dt>Stack</dt>
+          <dd>Java, JavaFX</dd>
+        </div>
+        <div>
+          <dt>Code</dt>
+          <!-- TODO: replace with the actual repo URL if public -->
+          <dd><a href="https://github.com/yiweipwang">GitHub</a></dd>
+        </div>
+      </dl>
+    </div>
+
+    <article class="shell prose">
+      <h2>Why this project</h2>
+      <p>
+        Minesweeper looks like a toy but contains two genuinely interesting
+        computer-science problems: efficiently revealing connected regions of
+        the board, and reasoning about where the mines probably are given
+        incomplete information. I wanted to solve both well enough that the
+        program could not just play the game, but teach it and compete at it.
+      </p>
+
+      <h2>How it works</h2>
+      <p>
+        The flood reveal — what happens when you click an empty cell and a
+        whole region opens up — is a breadth-first search over the grid,
+        expanding from the clicked cell until it reaches the numbered frontier.
+        BFS keeps the reveal correct and instant even on large boards, and the
+        same traversal doubles as the win-condition check.
+      </p>
+      <p>
+        The hint engine and the AI opponent share a risk model. For each
+        unopened cell on the frontier, the solver builds a tree of consistent
+        mine assignments under the visible number constraints and uses it to
+        estimate each cell's mine probability. The hint system surfaces the
+        lowest-risk cell to the player; the opponent simply takes it. When no
+        safe deduction exists — the situations where human players guess — the
+        opponent guesses by the same probabilities, which makes its play feel
+        honest rather than psychic.
+      </p>
+      <p>
+        The tutorial mode walks a new player through those same deductions on
+        curated boards, highlighting which numbers force which conclusions, so
+        the "AI" and the teaching material are one codebase rather than two.
+      </p>
+      <!-- TODO: add a screenshot or short GIF of the hint overlay here.
+           <figure class="figure"><img src="/assets/img/minesweeper-hint.png"
+           alt="Minesweeper board with the hint system highlighting the lowest-risk cell"
+           width="720" height="480" loading="lazy">
+           <figcaption class="meta">The hint engine ranking frontier cells by mine probability.</figcaption></figure> -->
+
+      <h2>What I took from it</h2>
+      <p>
+        Designing the opponent forced a clean separation between game state,
+        inference, and UI — the solver knows nothing about JavaFX, which made
+        it testable with plain unit tests. It was also a lesson in product
+        thinking: the hint feature and the opponent are the same algorithm
+        wearing two different interfaces.
+      </p>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell">
+      <ul class="contact-links">
+        <li><a href="mailto:yiweiwang2007@gmail.com">yiweiwang2007@gmail.com</a></li>
+        <li><a href="https://github.com/yiweipwang">GitHub</a></li>
+        <li><a href="https://linkedin.com/in/yiwei-wang-12bb88285">LinkedIn</a></li>
+      </ul>
+      <p class="meta">© 2026 Yiwei Wang · Providence, RI</p>
+    </div>
+  </footer>
+</body>
+</html>

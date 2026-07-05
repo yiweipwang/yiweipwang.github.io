@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Volatility Dispersion Backtest — Yiwei Wang</title>
+  <meta name="description" content="End-to-end multi-variant volatility dispersion backtest in Python — four signal variants, full cost model, validation gates, and auto-generated tearsheet PDF.">
+  <link rel="canonical" href="https://yiweipwang.github.io/projects/dispersion/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Volatility Dispersion Backtest — Yiwei Wang">
+  <meta property="og:description" content="Four signal variants, full cost model, and auto-generated tearsheet PDF. No external backtest framework.">
+  <meta property="og:url" content="https://yiweipwang.github.io/projects/dispersion/">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=Public+Sans:wght@400;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="shell">
+      <a class="wordmark" href="/">Yiwei Wang</a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="/#work">Work</a>
+        <a href="/#about">About</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <header class="case-header shell">
+      <a class="back-link" href="/#work">&larr; All work</a>
+      <h1>Volatility dispersion backtest</h1>
+      <p class="lede">
+        An end-to-end options backtest implementing four variants of volatility
+        dispersion — from classic variance swaps to 0DTE-driven signals — with
+        a point-in-time data discipline, full transaction cost model, six
+        validation gates, and an auto-generated comparison tearsheet.
+      </p>
+    </header>
+
+    <div class="shell">
+      <dl class="facts">
+        <div>
+          <dt>Year</dt>
+          <dd>2026</dd>
+        </div>
+        <div>
+          <dt>Type</dt>
+          <dd>Quantitative finance</dd>
+        </div>
+        <div>
+          <dt>Stack</dt>
+          <dd>Python, pandas, NumPy</dd>
+        </div>
+        <div>
+          <dt>Code</dt>
+          <dd><a href="https://github.com/yiweipwang/dispersion-backtest">GitHub</a></dd>
+        </div>
+      </dl>
+    </div>
+
+    <article class="shell prose">
+      <h2>The idea</h2>
+      <p>
+        Volatility dispersion exploits the tendency of index implied volatility to
+        trade rich relative to the weighted sum of its constituents' implied vols.
+        The trade is to sell index variance and buy constituent variance — collecting
+        the "correlation premium" that options market-makers charge for the
+        diversification protection embedded in index puts.
+      </p>
+      <p>
+        The project implements four distinct ways to express this idea, each with
+        different Greeks profiles and market conditions that favor them.
+      </p>
+
+      <h2>Four variants</h2>
+      <p>
+        V1 is classic variance dispersion: replicate variance swaps on the index
+        and each constituent using the model-free replication formula, then go short
+        index variance and long constituent variance weighted by market cap.
+        V2 translates the same trade into implied-correlation space — backing out
+        the implied correlation from the index and constituent surfaces and trading
+        it directly against realized correlation.
+        V5 enters when the realized-vs-implied correlation spread crosses a
+        threshold, sizing the position by the width of that spread.
+        V6 uses 0DTE index options to express the short-correlation view at much
+        shorter time horizons, refreshing the hedge daily.
+      </p>
+
+      <h2>Architecture</h2>
+      <p>
+        The codebase has 14 modules, each with a single responsibility: data
+        loading, implied surface construction, Black-Scholes Greeks, variance swap
+        pricing, basket weight calculation, signal generation, execution simulation,
+        P&amp;L attribution, risk metrics, cost modelling, validation gates, and
+        tearsheet generation. Public APIs use standard Python types throughout — no
+        internal dataclasses leak between layers, which made unit-testing
+        straightforward and the modules reusable independently.
+      </p>
+      <p>
+        All thresholds and hyperparameters live in YAML config files. Running a
+        different variant requires only a config change, not a code change.
+        <code>make all</code> runs all four required variants and generates the
+        comparison tearsheet PDF in under 60 minutes on a laptop.
+      </p>
+
+      <h2>Point-in-time discipline</h2>
+      <p>
+        The backtest window (Jan 2022) is cleanly separated from the estimation
+        window (Oct–Dec 2021). All loaders enforce the as-of date from the
+        <code>date</code> column; the 21-day realized correlation entering Jan 3
+        is computed on December data only. Every run writes a metadata JSON
+        with the git SHA, config hash, data hashes, and timestamp so results
+        are exactly reproducible.
+      </p>
+
+      <h2>Validation</h2>
+      <p>
+        Six validation gates run as pytest cases: gamma and vega within 0.5%
+        of a vendor reference, variance swap strike within 2 vol points of ATM IV,
+        implied correlation in the [0, 1] plausibility range, a look-ahead
+        audit confirming no future data enters any signal, a cost sanity check,
+        and a full reproducibility gate. All six pass across all four variants.
+      </p>
+
+      <h2>What I took from it</h2>
+      <p>
+        Building the variance swap replication from scratch — rather than using
+        a framework — forced a deep engagement with the math: the log-contract
+        approximation, the discretization error in the strip of options, and
+        the boundary treatment for deep OTM strikes. The implied-correlation
+        back-out is similarly tricky to get right numerically; I verified the
+        round-trip error to under 1e-6. The project also sharpened my instinct
+        for look-ahead contamination, which is easy to introduce accidentally
+        when estimation and backtest windows share the same DataFrame.
+      </p>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell">
+      <ul class="contact-links">
+        <li><a href="mailto:yiweiwang2007@gmail.com">yiweiwang2007@gmail.com</a></li>
+        <li><a href="https://github.com/yiweipwang">GitHub</a></li>
+        <li><a href="https://linkedin.com/in/yiwei-wang-12bb88285">LinkedIn</a></li>
+      </ul>
+      <p class="meta">© 2026 Yiwei Wang · Providence, RI</p>
+    </div>
+  </footer>
+</body>
+</html>
