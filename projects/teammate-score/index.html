@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Teammate Score — Yiwei Wang</title>
+  <meta name="description" content="A full-stack web app that scores your League of Legends teammates using Bayesian Z-score normalization and role-adjusted baselines across your last 50 games.">
+  <link rel="canonical" href="https://yiweipwang.github.io/projects/teammate-score/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Teammate Score — Yiwei Wang">
+  <meta property="og:description" content="Role-adjusted Bayesian scoring of League of Legends teammates across 50-game match history.">
+  <meta property="og:url" content="https://yiweipwang.github.io/projects/teammate-score/">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=Public+Sans:wght@400;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="shell">
+      <a class="wordmark" href="/">Yiwei Wang</a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="/#work">Work</a>
+        <a href="/#about">About</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <header class="case-header shell">
+      <a class="back-link" href="/#work">&larr; All work</a>
+      <h1>Teammate Score</h1>
+      <p class="lede">
+        Enter a League of Legends Riot ID and get a statistical breakdown of
+        how well your teammates performed across your last 50 games — scored
+        against role-specific baselines, not just relative to the enemy team.
+      </p>
+    </header>
+
+    <div class="shell">
+      <dl class="facts">
+        <div>
+          <dt>Year</dt>
+          <dd>2026</dd>
+        </div>
+        <div>
+          <dt>Type</dt>
+          <dd>Full-stack web app</dd>
+        </div>
+        <div>
+          <dt>Stack</dt>
+          <dd>React, Python, Flask, Riot Games API</dd>
+        </div>
+        <div>
+          <dt>Code</dt>
+          <dd><a href="https://github.com/yiweipwang/teammate-score-app">GitHub</a></dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- Add a screenshot here once you have one.
+         Save it as /assets/img/proj-07.webp (296×192) for the index card,
+         and a wider version like teammate-score-main.webp for this page.
+    <figure class="figure shell">
+      <img src="/assets/img/teammate-score-main.webp"
+           alt="Teammate Score app showing a player recap with Z-score breakdown"
+           width="960" height="560" loading="lazy">
+      <figcaption class="meta">The recap view after analyzing 50 games for BhallZhack#NA1.</figcaption>
+    </figure>
+    -->
+
+    <article class="shell prose">
+      <h2>The problem</h2>
+      <p>
+        League has five roles, and each one has completely different performance
+        expectations. A Support with a vision score of 60 is having a great game;
+        a Midlaner with the same score is having an exceptional one. If you just
+        compare raw stats across your teammates, the Support looks worse than they
+        are — or the Jungler's kill participation looks inflated because Junglers
+        are expected to be everywhere. I wanted a score that accounted for this,
+        so I could actually tell whether a loss was because my teammates underperformed
+        or because the enemy team just played better.
+      </p>
+
+      <h2>How the scoring works</h2>
+      <p>
+        For each teammate in each of your last 50 matches, the app pulls their
+        stats from the Riot Games Match V5 API and computes a Z-score for every
+        metric — vision score, gold per minute, kill participation, damage per
+        minute — against a set of role-specific baselines:
+      </p>
+      <pre><code>Z = (player_stat − μ_role) / σ_role</code></pre>
+      <p>
+        Those Z-scores are then combined with weights that reflect how important
+        each metric is to winning, and mapped onto a 0–100 scale centered at 50
+        (average performance for that role). A teammate who scores 65 played
+        noticeably better than a typical player in their position; one who scores
+        35 dragged their lane.
+      </p>
+      <p>
+        Beyond individual scores, the app also runs a team gap analysis that
+        sums Z-scores across all four teammates for each metric. When the sum
+        drops below −2.0 — two standard deviations below expected across the
+        whole team — it flags a deficiency and explains what it means strategically.
+        A vision gap in every game, for example, means you were consistently
+        playing with worse map information than the enemy team, regardless of
+        whether you won or lost those games.
+      </p>
+
+      <h2>Architecture</h2>
+      <p>
+        The backend is a Flask API deployed on Render. It handles Riot API
+        calls with rate-limit backoff, runs the statistical analysis, and caches
+        results in Upstash Redis so that a repeat lookup for the same player
+        returns instantly instead of re-fetching 50 match records. Match
+        fetching is parallelized across eight threads, which cuts the cold-start
+        time from roughly 50 seconds (sequential) to about 10.
+      </p>
+      <p>
+        The frontend is a React app deployed on Vercel. It kicks off an async
+        job, polls the backend for progress, and renders the results — per-game
+        teammate scores, aggregate stats, and consistency metrics across the
+        match history — once the analysis completes.
+      </p>
+
+      <h2>What I took from it</h2>
+      <p>
+        The main thing this project taught me is how much the frame matters
+        when you're evaluating performance. Raw numbers feel objective, but
+        a Support's raw vision score and a Midlaner's raw vision score
+        aren't measuring the same thing. Getting the normalization right meant
+        thinking carefully about what "good" actually means per role, not just
+        finding a formula that produced a number.
+      </p>
+      <p>
+        On the engineering side, managing an async job across a polling frontend
+        and a threaded backend was a useful exercise in designing for latency —
+        you want the user to see something meaningful while 50 API calls are
+        in flight, not just a spinner.
+      </p>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell">
+      <ul class="contact-links">
+        <li><a href="mailto:yiweiwang2007@gmail.com">yiweiwang2007@gmail.com</a></li>
+        <li><a href="https://github.com/yiweipwang">GitHub</a></li>
+        <li><a href="https://linkedin.com/in/yiwei-wang-12bb88285">LinkedIn</a></li>
+      </ul>
+      <p class="meta">© 2026 Yiwei Wang · La Cañada Flintridge, CA</p>
+    </div>
+  </footer>
+</body>
+</html>
